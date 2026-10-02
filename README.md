@@ -1,10 +1,12 @@
-# GroundingDINO (Custom GPU-Optimized Version)
+# GroundingDINO (Windows GPU-Compatible Version)
 
-This repository contains a modified version of **GroundingDINO**, optimized to run on Windows systems with NVIDIA GPUs (especially RTX 40-series) that may have compatibility issues with the default installation.
+This repository contains a modified version of [**IDEA-Research/GroundingDINO**](https://github.com/IDEA-Research/GroundingDINO) (Apache-2.0), patched to run on Windows systems with NVIDIA GPUs (tested on an RTX 4050) where the default installation fails to build the custom CUDA extension.
+
+> **Upstream fix:** the core bug fix from this repo (`NameError: name '_C' is not defined`) has been submitted upstream as [IDEA-Research/GroundingDINO#465](https://github.com/IDEA-Research/GroundingDINO/pull/465). With it, the model falls back to the pure-PyTorch deformable-attention op **on GPU** (~15x faster than CPU on an RTX 4050, output identical to within 1.8e-06). This is slower than the compiled CUDA kernel, so it's a compatibility fix, not a speed-up.
 
 It includes:
-1.  **Fixed Setup**: Modified `setup.py` to bypass C++ extension compilation failures.
-2.  **GPU Fallback**: Patched code to use PyTorch native functions if custom CUDA extensions fail, ensuring GPU acceleration still works.
+1.  **Fixed Setup**: Modified `setup.py` to skip compiling the CUDA extension (avoids build failures on Windows; the GPU fallback below is used instead).
+2.  **GPU Fallback**: Patched code to use the PyTorch-native deformable attention if the custom CUDA extension fails to load, so inference still runs on the GPU (slower than the compiled kernel, but no crash).
 3.  **Dependency Fixes**: Resolves conflicts with `transformers` and `torch`.
 
 ## 1. System Requirements
